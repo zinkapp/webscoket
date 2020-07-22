@@ -30,4 +30,4 @@ deployment_app:
   script:
     - echo "Deploy to staging server"
     - /root/.fly/bin/flyctl auth token $FLY_API_TOKEN
-    - /root/.fly/bin/flyctl --app zinkapi deploy 
+    - /root/.fly/bin/flyctl --app $FLY_APP_NAME deploy 
