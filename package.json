@@ -1,0 +1,43 @@
+{
+  "name": "flyz-gw",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "private": "false",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "start": "ts-node src/main",
+    "start:dev": "nodemon",
+    "start:prod": "node dist/main"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/chalk": "^2.2.0",
+    "@types/dotenv": "^8.2.0",
+    "@types/moment": "^2.13.0",
+    "@types/node": "^14.0.24",
+    "@types/socket.io": "^2.1.10",
+    "nodemon": "^2.0.4",
+    "prettier": "^2.0.5",
+    "ts-loader": "^8.0.1",
+    "ts-node": "^8.10.2",
+    "tsconfig-paths": "^3.9.0",
+    "typedi": "^0.8.0",
+    "typescript": "^3.9.7"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "chalk": "^4.1.0",
+    "dotenv": "^8.2.0",
+    "moment": "^2.27.0",
+    "reflect-metadata": "^0.1.13",
+    "rimraf": "^3.0.2",
+    "rxjs": "^6.6.0",
+    "socket.io": "^2.3.0"
+  }
+}
