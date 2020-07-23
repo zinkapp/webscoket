@@ -1,9 +1,12 @@
-import { NSP } from "src/types/NSP";
+import IO from "socket.io";
 import { Server } from "socket.io";
+import {PoolModule} from "./pool/module"
 
-export class AppModule implements NSP.Module {
-  constructor(public io: Server) {}
-  register() {
-    console.log(this.io);
-  }
+export class AppModule implements IO.Module {
+  constructor(
+    private io: Server
+  ) {}
+  imports = [
+    PoolModule
+  ]
 }

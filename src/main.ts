@@ -1,9 +1,16 @@
-import { ServerFactory } from "src/lib/app";
-import { AppModule } from "src/module";
-import { Config } from "src/config";
+import "reflect-metadata"
+import * as http from "http";
+import * as https from "https";
+import { ServerFactory } from "./lib/app";
+import { AppModule } from "./module";
+import { Config } from "./config";
+import Container from "typedi";
 
 async function main() {
-  const [app, io] = ServerFactory.create([AppModule]);
+  const app = http.createServer()
+  const server = ServerFactory.create(app)
+
+  new ServerFactory().init(AppModule)
 
   app.listen(Config.PORT, () => {
     console.log("Application starting at", Config.PORT);
