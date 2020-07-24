@@ -8,9 +8,11 @@ RUN npm i --production
 
 COPY . .
 
-RUN npm i -g typescript
-RUN npm run build
-
 ENV PORT=8080
+ENV PORT
+
+RUN npm i -g typescript
+RUN npm run prebuild
+RUN npm run build
 
 CMD [ "npm","start:prod" ]
