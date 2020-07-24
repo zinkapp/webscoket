@@ -5,14 +5,14 @@ import { AppModule } from "./module";
 import { Config } from "./config";
 
 async function main() {
-  const app = http.createServer();
-  const server = ServerFactory.create(app);
+    const app = http.createServer();
+    ServerFactory.create(app);
 
-  new ServerFactory().init(AppModule);
+    new ServerFactory().init(AppModule);
 
-  app.listen(Config.PORT, () => {
-    console.log("Application starting at", Config.PORT);
-  });
+    app.listen(Config.PORT, () => {
+        console.log("Application starting at", Config.PORT);
+    });
 }
 
 main();
