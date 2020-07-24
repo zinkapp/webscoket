@@ -26,6 +26,13 @@ export class ServerFactory {
             if (!nspModInstance.gateways) nspModInstance.gateways = [];
             if (!nspModInstance.providers) nspModInstance.providers = [];
             if (!nspModInstance.imports) nspModInstance.imports = [];
+            /*nspModInstance.imports.forEach((i)=>{
+                Container.set({
+                    id: moduleInstance.,
+                    value: i,
+                    multiple: true
+                })
+            })*/
             nspModInstance.gateways.forEach((g) => {
                 const gaInstance: Socket.Gateway = new g(
                     ...nspModInstance.providers.map((p) => Container.get(p)),
@@ -38,6 +45,9 @@ export class ServerFactory {
                 const nsp = io.of(path);
                 nsp.use(AuthGuard);
                 nsp.on("connection", (socket) => {
+                    socket.on("zink.ping", () =>
+                        socket.emit("zink.pong", true),
+                    );
                     events.forEach(({ eventName, key }) => {
                         socket.on(eventName, async (data) => {
                             try {
