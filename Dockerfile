@@ -15,4 +15,4 @@ RUN npm i -g typescript
 RUN npm run prebuild
 RUN npm run build
 
-CMD [ "npm","start:prod" ]
+CMD [ "npm","run","start:prod" ]
