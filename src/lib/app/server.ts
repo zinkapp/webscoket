@@ -26,13 +26,6 @@ export class ServerFactory {
             if (!nspModInstance.gateways) nspModInstance.gateways = [];
             if (!nspModInstance.providers) nspModInstance.providers = [];
             if (!nspModInstance.imports) nspModInstance.imports = [];
-            /*nspModInstance.imports.forEach((i)=>{
-                Container.set({
-                    id: moduleInstance.,
-                    value: i,
-                    multiple: true
-                })
-            })*/
             nspModInstance.gateways.forEach((g) => {
                 const gaInstance: Socket.Gateway = new g(
                     ...nspModInstance.providers.map((p) => Container.get(p)),
@@ -45,32 +38,46 @@ export class ServerFactory {
                 const nsp = io.of(path);
                 nsp.use(AuthGuard);
                 nsp.on("connection", (socket) => {
+                    socket.on("disconnect", () =>
+                        gaInstance.onDisconnect(socket),
+                    );
+                    if (gaInstance.onConnection)
+                        gaInstance.onConnection(socket);
                     socket.on("zink.ping", () =>
                         socket.emit("zink.pong", true),
                     );
                     events.forEach(({ eventName, key }) => {
                         socket.on(eventName, async (data) => {
                             try {
-                                const response = await gaInstance[key]({
-                                    ...socket,
+                                const param = {
+                                    user: socket.user,
+                                    socket,
                                     data,
-                                });
-                                if (!response.event)
-                                    throw new Error("Response Event Not Found");
-                                if (!response.message)
-                                    throw new Error(
-                                        "Response Message Not Found",
-                                    );
+                                };
+                                Reflect.defineMetadata("param", param, g);
+                                const response = await gaInstance[key](param);
                                 if (response.err) {
                                     if (
-                                        !response.err.message ||
-                                        response.err.code
+                                        !(
+                                            response.err.message ^
+                                            response.err.code
+                                        )
                                     )
                                         throw new Error(
                                             "Response Error Field Invalid",
                                         );
                                     return socket.emit("error", response.err);
                                 }
+                                if (!response.event)
+                                    throw new Error("Response Event Not Found");
+                                if (!response.message)
+                                    throw new Error(
+                                        "Response Message Not Found",
+                                    );
+                                if (response.room)
+                                    return socket
+                                        .to(response.room)
+                                        .emit(response.event, response.message);
                                 return socket.emit(
                                     response.event,
                                     response.message,

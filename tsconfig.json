@@ -9,7 +9,8 @@
         "target": "ES2020",
         "sourceMap": true,
         "outDir": "./dist",
-        "typeRoots": ["node_modules/@types", "src/types"],
+        "baseUrl": "src/",
+        "typeRoots": ["node_modules/@types", "src/@types"],
         "incremental": true
     }
 }
