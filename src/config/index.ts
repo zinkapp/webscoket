@@ -1,5 +1,12 @@
-if(process.env.NODE_ENV !== "production") 
-    require("dotenv").config()
+import fs from "fs"
+
+const isProd = process.env.NODE_ENV === "production"
+if(isProd) {
+    const env = require("dotenv").parse(fs.readFileSync("prod.env"));
+    for (const k in env) {
+        process.env[k] = env[k];
+    }
+} else require("dotenv").config()
 
 export const Config = {
     PORT: Number(process.env.PORT) || Number(process.argv[2]) || 3000,

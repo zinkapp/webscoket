@@ -6,7 +6,7 @@
   "private": "false",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "tsc",
+    "build": "npm run prebuild && tsc",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "ts-node src/main",
     "start:dev": "nodemon",
