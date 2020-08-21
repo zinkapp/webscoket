@@ -8,13 +8,16 @@ export const AuthGuard = async (
     const { access_token } = socket.handshake.query;
     if (!access_token) next(new Error("Unauthorized Connection"));
     try {
-        const user: IO.ISocketUser = await api.get("/users/@me", {
-            headers: {
-                authorization: access_token,
-            },
-        });
+        const user: IO.ISocketUser = (
+            await api.get("/users/@me", {
+                headers: {
+                    authorization: access_token,
+                },
+            })
+        ).data;
         if (!user) return next(new Error("Unauthorized Connection"));
         socket.user = user;
+        socket.token = access_token;
         next();
     } catch (e) {
         next(new Error("Unauthorized Connection"));
