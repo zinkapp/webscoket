@@ -4,11 +4,11 @@ import { SocketUser } from "../User/SocketUser";
 export abstract class Gateway {
     constructor([propName]: any) {}
 
-    onConnection?(user: SocketUser, event: string, socket: Socket): void {}
+    onConnection?(socket: Socket): void {}
 
-    onDisconnect?(user: SocketUser, socket: Socket): void {}
+    onDisconnect?(socket: Socket): void {}
 
-    didDisconnect?(user: SocketUser, socket: Socket): void {}
+    didDisconnect?(socket: Socket): void {}
 
     [propName: string]: any | Promise<any>;
 }

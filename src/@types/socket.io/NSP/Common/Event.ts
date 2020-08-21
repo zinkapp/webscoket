@@ -6,8 +6,9 @@ export interface IResponse {
         code: number;
         message: string;
     };
-    event: string;
-    message: any;
+    event?: string;
+    room?: string;
+    message?: any;
 }
 
 export interface IRequest {
