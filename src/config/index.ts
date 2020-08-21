@@ -1,5 +1,5 @@
-import { config } from "dotenv";
-config();
+if(process.env.NODE_ENV !== "production") 
+    require("dotenv").config()
 
 export const Config = {
     PORT: Number(process.env.PORT) || Number(process.argv[2]) || 3000,
