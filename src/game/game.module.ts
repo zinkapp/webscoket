@@ -1,13 +1,12 @@
-import NSP from "socket.io";
 import cache from "memory-cache";
 import { GameService } from "./game.service";
 import { GameGateway } from "./game.gateway";
 
-export class PoolModule implements NSP.Module {
-    constructor(private io: NSP.Server) {
+export class PoolModule implements Zink.Module {
+    constructor(private io: SocketIO.Server) {
         io.use((socket, next) => {
-            const matchPool: NSP.Match[] = cache.get("match.pool");
-            const match: NSP.Match = matchPool.find(({ users }) =>
+            const matchPool: Zink.Match.Area[] = cache.get("match.pool");
+            const match: Zink.Match.Area = matchPool.find(({ users }) =>
                 users.some(({ id }) => id == socket.user.id),
             );
             if (!match) next(new Error("Unauthorized Request"));

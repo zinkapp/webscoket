@@ -1,13 +1,12 @@
 import { Event, Gateway } from "../lib/decorators";
 import { GameService } from "./game.service";
-import Socket from "socket.io";
 
 @Gateway("/game")
-export class GameGateway implements Socket.Gateway {
+export class GameGateway implements Zink.Gateway {
     constructor(private gameService: GameService) {}
 
     @Event("iam.ready")
-    iamReady(ctx: Socket.GameRequest) {
+    iamReady(ctx: Zink.Match.Request) {
         return this.gameService.iamReadyForMatch(ctx);
     }
 }

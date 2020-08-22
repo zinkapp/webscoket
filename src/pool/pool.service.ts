@@ -1,5 +1,4 @@
 import { Service } from "typedi";
-import Socket from "socket.io";
 import cache from "memory-cache";
 import { GameService } from "../game/game.service";
 
@@ -10,9 +9,9 @@ export class PoolService {
         user,
         type,
     }: {
-        user: Socket.ISocketUser;
+        user: Zink.User;
         type: number;
-    }): Promise<Socket.IResponse> {
+    }): Promise<Zink.Response> {
         const pool: { id: number; type: number }[] = cache.get("pool");
         const dUser = pool.find((u) => u.id === user.id);
         if (dUser)

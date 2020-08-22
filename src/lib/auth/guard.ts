@@ -8,7 +8,7 @@ export const AuthGuard = async (
     const { access_token } = socket.handshake.query;
     if (!access_token) next(new Error("Unauthorized Connection"));
     try {
-        const user: IO.ISocketUser = (
+        const user: Zink.User = (
             await api.get("/users/@me", {
                 headers: {
                     authorization: access_token,

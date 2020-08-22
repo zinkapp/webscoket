@@ -1,11 +1,10 @@
 import { Service } from "typedi";
 import { api } from "../lib/api";
 import cache from "memory-cache";
-import { ErrorAPI, Match, IResponse, GameRequest, Socket } from "socket.io";
 
 @Service()
 export class GameService {
-    private matchPool: { [matchID: string]: Match } = {};
+    private matchPool: { [matchID: string]: Zink.Match.Area } = {};
     /**
      * **Note:**  will add to creating match on API
      *
@@ -15,22 +14,24 @@ export class GameService {
     async createMatch(
         type: number,
         ...ids: number[]
-    ): Promise<Match | ErrorAPI> {
+    ): Promise<
+        Zink.Match.Area | { statusCode: number; message: string; error: string }
+    > {
         try {
-            const match: Match = (
+            const match: Zink.Match.Area = (
                 await api.put(`/matches`, { type, users: ids })
             ).data;
             cache.put("match.pool", [...cache.get("match.pool"), match]);
             Object.assign(match, {
-                users: Object.assign({}, match.users, { ready: false }),
+                users: match.users.map((u) =>
+                    Object.assign(u, { ready: true }),
+                ),
             });
             this.matchPool[match.id] = match;
             return match;
-        } catch (e) {
-            return e.response.data;
-        }
+        } catch (e) {}
     }
-    async iamReadyForMatch(ctx: GameRequest): Promise<IResponse> {
+    async iamReadyForMatch(ctx: Zink.Match.Request): Promise<Zink.Response> {
         const match = this.matchPool[ctx.match.id];
         match.users.map((u) =>
             u.id === ctx.user.id
@@ -52,13 +53,13 @@ export class GameService {
         };
     }
 
-    async matchArea(id: number, socket: Socket) {
+    async matchArea(id: number, socket: SocketIO.Socket) {
         const match = this.matchPool[id];
         //The Rounds're going to be here
         return this.finishMatch(match, socket);
     }
 
-    roundCreate(match: Match) {
+    roundCreate(match: Zink.Match.Area) {
         switch (match.type) {
             case "catch":
 
@@ -73,7 +74,7 @@ export class GameService {
         }
     }
     delMatch(id: number) {
-        const matchPool: Match[] = cache.get("match.pool");
+        const matchPool: Zink.Match.Area[] = cache.get("match.pool");
         cache.put(
             "match.pool",
             matchPool.filter((m) => m.id !== id),
@@ -81,7 +82,7 @@ export class GameService {
         delete this.matchPool[id];
         return true;
     }
-    finishMatch(match: Match, socket: Socket) {
+    finishMatch(match: Zink.Match.Area, socket: SocketIO.Socket) {
         this.delMatch(match.id);
         match.users.forEach((u) =>
             socket.in(u.socketID).leave(`match.${match.id}`, () => {

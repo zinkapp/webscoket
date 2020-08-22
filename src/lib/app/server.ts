@@ -1,7 +1,6 @@
 import * as http from "http";
 import * as https from "https";
 import * as IO from "socket.io";
-import Socket from "socket.io";
 import Container from "typedi";
 import { Logger } from "../logger";
 import { AuthGuard } from "../auth/guard";
@@ -10,24 +9,24 @@ export class ServerFactory {
     private logger: Logger = Container.get(Logger);
     static create(
         app: https.Server | http.Server,
-        config: Socket.ServerOptions = {},
-    ): Socket.Server {
+        config: IO.ServerOptions = {},
+    ): IO.Server {
         const io = IO(app, config);
         Container.set("io", io);
         Container.set("app", app);
         return io;
     }
     init(Module: any) {
-        const io: Socket.Server = Container.get("io");
+        const io: IO.Server = Container.get("io");
         const app: http.Server = Container.get("app");
-        const moduleInstance: Socket.Module = new Module(io);
+        const moduleInstance: Zink.Module = new Module(io);
         moduleInstance.imports.forEach((m) => {
-            const nspModInstance: Socket.Module = new m(io);
+            const nspModInstance: Zink.Module = new m(io);
             if (!nspModInstance.gateways) nspModInstance.gateways = [];
             if (!nspModInstance.providers) nspModInstance.providers = [];
             if (!nspModInstance.imports) nspModInstance.imports = [];
             nspModInstance.gateways.forEach((g) => {
-                const gaInstance: Socket.Gateway = new g(
+                const gaInstance: Zink.Gateway = new g(
                     ...nspModInstance.providers.map((p) => Container.get(p)),
                 );
                 const path = Reflect.getMetadata("path", g);
