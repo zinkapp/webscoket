@@ -1,93 +1,41 @@
+import "reflect-metadata";
 import * as http from "http";
-import * as https from "https";
-import * as IO from "socket.io";
-import Container from "typedi";
+import { Container } from "typedi";
 import { Logger } from "../logger";
-import { AuthGuard } from "../auth/guard";
 
 export class ServerFactory {
-    private logger: Logger = Container.get(Logger);
-    static create(
-        app: https.Server | http.Server,
-        config: IO.ServerOptions = {},
-    ): IO.Server {
-        const io = IO(app, config);
-        Container.set("io", io);
-        Container.set("app", app);
-        return io;
-    }
-    init(Module: any) {
-        const io: IO.Server = Container.get("io");
-        const app: http.Server = Container.get("app");
-        const moduleInstance: Zink.Module = new Module(io);
-        moduleInstance.imports.forEach((m) => {
-            const nspModInstance: Zink.Module = new m(io);
-            if (!nspModInstance.gateways) nspModInstance.gateways = [];
-            if (!nspModInstance.providers) nspModInstance.providers = [];
-            if (!nspModInstance.imports) nspModInstance.imports = [];
-            nspModInstance.gateways.forEach((g) => {
-                const gaInstance: Zink.Gateway = new g(
-                    ...nspModInstance.providers.map((p) => Container.get(p)),
-                );
-                const path = Reflect.getMetadata("path", g);
-                const events: Array<{
+    static async create(
+        app: http.Server,
+        mod: any,
+        adapter: Zink.Adapter,
+        config?: Zink.ServerConfig,
+    ): Promise<SocketIO.Server> {
+        const logger = Container.get(Logger);
+        logger.log("success", "Starting Application");
+        const io = adapter.create(app, config);
+        const moduleHandler = (mod) => {
+            const Mod: Zink.IModule = {
+                imports: Reflect.getMetadata("imports", mod) || [],
+                gateways: Reflect.getMetadata("gateways", mod) || [],
+                providers: Reflect.getMetadata("providers", mod) || [],
+            };
+            logger.log("success", `Mapped ${mod.name} Module`);
+            Mod.gateways.forEach((g) => {
+                const path: string = Reflect.getMetadata("path", g);
+                const events: {
                     key: string;
                     eventName: string;
-                }> = Reflect.getMetadata("events", g);
-                const nsp = io.of(path);
-                nsp.use(AuthGuard);
-                nsp.on("connection", (socket) => {
-                    socket.on("disconnect", () =>
-                        gaInstance.onDisconnect(socket),
-                    );
-                    if (gaInstance.onConnection)
-                        gaInstance.onConnection(socket);
-                    socket.on("zink.ping", () =>
-                        socket.emit("zink.pong", true),
-                    );
-                    events.forEach(({ eventName, key }) => {
-                        socket.on(eventName, async (data) => {
-                            try {
-                                const param = {
-                                    user: socket.user,
-                                    socket,
-                                    data,
-                                };
-                                Reflect.defineMetadata("param", param, g);
-                                const response = await gaInstance[key](param);
-                                if (response.err) {
-                                    if (
-                                        !(
-                                            response.err.message ^
-                                            response.err.code
-                                        )
-                                    )
-                                        throw new Error(
-                                            "Response Error Field Invalid",
-                                        );
-                                    return socket.emit("error", response.err);
-                                }
-                                if (!response.event)
-                                    throw new Error("Response Event Not Found");
-                                if (!response.message)
-                                    throw new Error(
-                                        "Response Message Not Found",
-                                    );
-                                if (response.room)
-                                    return socket
-                                        .to(response.room)
-                                        .emit(response.event, response.message);
-                                return socket.emit(
-                                    response.event,
-                                    response.message,
-                                );
-                            } catch (e) {
-                                this.logger.log("error", e);
-                            }
-                        });
-                    });
-                });
+                }[] = Reflect.getMetadata("events", g);
+                adapter.gatewayHandler(io, { events, path, target: g });
+                logger.log("success", `Added ${g.name} Gateway {${path}}`);
+                events.forEach((e) =>
+                    logger.log("success", `Mapped {${e.eventName}} route`),
+                );
             });
-        });
+            Mod.imports.forEach((i) => moduleHandler(i));
+        };
+        moduleHandler(mod);
+        logger.log("success", "Application successfully started");
+        return io;
     }
 }

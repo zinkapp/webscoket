@@ -1,9 +1,12 @@
 import IO from "socket.io";
 import { PoolGateway } from "./pool.gateaway";
 import { PoolService } from "./pool.service";
+import { Module } from "../lib/decorators";
+import {GameModule} from "../game/game.module"
 
-export class PoolModule implements Zink.Module {
-    constructor(private io: IO.Server) {}
-    gateways = [PoolGateway];
-    providers = [PoolService];
-}
+@Module({
+    imports: [GameModule],
+    gateways: [PoolGateway],
+    providers: [PoolService],
+})
+export class PoolModule {}

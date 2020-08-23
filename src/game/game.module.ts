@@ -1,9 +1,14 @@
 import cache from "memory-cache";
 import { GameService } from "./game.service";
 import { GameGateway } from "./game.gateway";
+import { Module } from "../lib/decorators";
 
-export class PoolModule implements Zink.Module {
-    constructor(private io: SocketIO.Server) {
+@Module({
+    gateways: [GameGateway],
+    providers: [GameService],
+})
+export class GameModule implements Zink.Module {
+    constructor(io: SocketIO.Server) {
         io.use((socket, next) => {
             const matchPool: Zink.Match.Area[] = cache.get("match.pool");
             const match: Zink.Match.Area = matchPool.find(({ users }) =>
@@ -16,6 +21,4 @@ export class PoolModule implements Zink.Module {
             next();
         });
     }
-    gateways = [GameGateway];
-    providers = [GameService];
 }
