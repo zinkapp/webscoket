@@ -1,6 +1,8 @@
-export {}
+import http from "http";
 
-declare global  {
+export {};
+
+declare global {
     namespace Zink {
         namespace Match {
             interface User extends Zink.User {
@@ -23,7 +25,11 @@ declare global  {
                     | number
                     | { x: number; y: number }
                     | string
-                    | { description: string; choices: string[]; answer: string };
+                    | {
+                          description: string;
+                          choices: string[];
+                          answer: string;
+                      };
             }
             interface Request extends Zink.Request {
                 match: Area;
@@ -57,26 +63,47 @@ declare global  {
         }
         abstract class Gateway {
             constructor([propName]: any);
-    
+
             onConnection?(socket: SocketIO.Socket): void;
-    
+
             onDisconnect?(socket: SocketIO.Socket): void;
-    
+
             didDisconnect?(socket: SocketIO.Socket): void;
-    
+
             [propName: string]: any | Promise<any>;
         }
         abstract class Module {
-            constructor([propName]: any);
+            constructor(io: SocketIO.Server);
             [propName: string]: any;
+            register?: (...imports) => void;
+        }
+        interface IModule {
             imports?: any[];
             gateways?: any[];
             providers?: any[];
-            register?: (...imports) => void;
+            exports?: any[];
         }
         abstract class Service {
             [propName: string]: any;
         }
+        abstract class Adapter {
+            public create(
+                app: http.Server,
+                options?: ServerConfig,
+            ): SocketIO.Server;
+            public gatewayHandler(
+                io: SocketIO.Server,
+                gateway: {
+                    target: any;
+                    path: string;
+                    events: { key: string; eventName: string }[];
+                },
+            ): void;
+            [propName: string]: any;
+        }
+        interface ServerConfig extends SocketIO.ServerOptions {
+            namespace?: string;
+            server?: SocketIO.Server;
+        }
     }
 }
-
