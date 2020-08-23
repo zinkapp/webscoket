@@ -1,18 +1,14 @@
-import "reflect-metadata";
 import * as http from "http";
 import { ServerFactory } from "./lib/app";
 import { AppModule } from "./module";
 import { Config } from "./config";
+import { SocketAdapter } from "./lib/adapters";
 
 async function main() {
     const app = http.createServer();
-    ServerFactory.create(app);
+    const io = await ServerFactory.create(app, AppModule, new SocketAdapter());
 
-    new ServerFactory().init(AppModule);
-
-    app.listen(Config.PORT, () => {
-        console.log("Application starting at", Config.PORT);
-    });
+    app.listen(Config.PORT);
 }
 
 main();

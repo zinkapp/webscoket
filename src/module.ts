@@ -1,7 +1,7 @@
-import IO from "socket.io";
 import { PoolModule } from "./pool/pool.module";
+import { Module } from "./lib/decorators";
 
-export class AppModule implements Zink.Module {
-    constructor(private io: IO.Server) {}
-    imports = [PoolModule];
-}
+@Module({
+    imports: [PoolModule],
+})
+export class AppModule {}
