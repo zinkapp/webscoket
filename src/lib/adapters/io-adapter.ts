@@ -4,6 +4,7 @@ import * as http from "http";
 import { Logger } from "../logger";
 import { ErrorException } from "../exceptions/ErrorException";
 import { GatewayException } from "../exceptions/GatewayException";
+import { EVENTS } from "../constants";
 
 export class SocketAdapter implements Zink.Adapter {
     private logger: Logger = Container.get(Logger);
@@ -16,22 +17,27 @@ export class SocketAdapter implements Zink.Adapter {
 
         return server || IO(app, opts);
     }
-    public gatewayHandler(io: SocketIO.Server, gateway) {
+    public gatewayHandler(
+        io: SocketIO.Server,
+        gateway: {
+            target: any;
+            path: string;
+            events: Array<{
+                key: string;
+                eventName: string;
+            }>;
+        },
+    ) {
         const ga: Zink.Gateway = Container.get(gateway.target);
-        const path: string = Reflect.getMetadata("path", gateway.target);
-        const events: Array<{
-            key: string;
-            eventName: string;
-        }> = Reflect.getMetadata("events", gateway.target);
-        const nsp = io.of(path);
-        nsp.on("connection", (socket) => {
-            socket.on("disconnect", () =>
+        const nsp = io.of(gateway.path);
+        nsp.on(EVENTS.CONNECTION, (socket) => {
+            socket.on(EVENTS.DISCONNECTION, () =>
                 typeof ga.onDisconnect === "function"
                     ? ga.onDisconnect(socket)
                     : null,
             );
-            socket.on("zink.ping", () => socket.emit("zink.pong", true));
-            this.eventHandler(socket, events, ga);
+            socket.on(EVENTS.PONG, () => socket.emit(EVENTS.PONG, true));
+            this.eventHandler(socket, gateway.events, ga);
         });
     }
 
