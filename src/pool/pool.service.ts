@@ -1,10 +1,11 @@
 import { Service } from "typedi";
 import cache from "memory-cache";
 import { GameService } from "../game/game.service";
+import { Inject } from "../lib/decorators";
 
 @Service()
 export class PoolService {
-    constructor(private GameService: GameService) {}
+    constructor(@Inject(()=>GameService) private GameService: GameService) {}
     public async joinPool({
         user,
         type,
