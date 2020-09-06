@@ -21,11 +21,7 @@ jobs:
       - run: /home/circleci/.fly/bin/flyctl --app ${APP_NAME} deploy
         
 workflows:
-  testing:
+  test-build-deploy:
     jobs:
       - testing
-  build-deploy:
-    jobs:
-      - build-deploy:
-          requires:
-            - testing
+      - build-deploy
