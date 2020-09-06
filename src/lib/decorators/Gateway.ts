@@ -1,7 +1,7 @@
 import { Container } from "typedi";
 
 export const Gateway = (namespace: string) => {
-    return (target) => {
+    return (target: unknown): void => {
         Container.set({
             id: "Gateways",
             value: target,

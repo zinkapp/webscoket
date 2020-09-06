@@ -2,8 +2,12 @@ import { Container } from "typedi";
 /**
  * Inject Imports on Provider
  */
-export const Inject = (prov?: () => any) => {
-    return (target, propertyName: string, index?: number) => {
+export const Inject = (prov?: () => unknown) => {
+    return (
+        target: ObjectConstructor,
+        propertyName: string,
+        index?: number,
+    ): void => {
         if (!prov) {
             const imports: Zink.IModule[] = Reflect.getMetadata(
                 "imports",

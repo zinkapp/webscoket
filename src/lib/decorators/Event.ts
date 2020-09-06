@@ -1,5 +1,5 @@
 export const Event = (eventName: string) => {
-    return (target, propertyKey: string) => {
+    return (target: unknown, propertyKey: string): void => {
         if (!Reflect.hasMetadata("events", target.constructor))
             Reflect.defineMetadata("events", [], target.constructor);
 

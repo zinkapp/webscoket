@@ -3,8 +3,14 @@ import Container from "typedi";
  * Inject Provider on Gateway
  */
 export const Provider = () => {
-    return (target, propertyName: string, index?: number) => {
-        const providers: any[] = Container.get(`${target.name}.providers`);
+    return (
+        target: ObjectConstructor,
+        propertyName: string,
+        index?: number,
+    ): void => {
+        const providers: typeof Zink.Service[] = Container.get(
+            `${target.name}.providers`,
+        );
         const provider: Zink.Service = providers.find(
             (s) => target.constructor[propertyName] instanceof s,
         );
