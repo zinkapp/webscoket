@@ -53,7 +53,12 @@ export class Logger {
         });
     }
 
-    log(type: TYPE, ...msg) {
+    log(type: TYPE, ...msg: unknown[]): void {
+        if (
+            process.env.NODE_ENV === "test" &&
+            !(type === "error" || type === "warn")
+        )
+            return;
         const i = TYPES.findIndex((t) => t === type);
         new LogFactory({
             displayBadge: true,
