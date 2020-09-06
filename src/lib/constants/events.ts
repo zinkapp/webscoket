@@ -5,4 +5,5 @@ export const EVENTS = {
     CONNECT: "connect",
     PING: "zink.ping",
     PONG: "zink.pong",
+    ERROR: "error",
 };
