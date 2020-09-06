@@ -3,7 +3,7 @@ orbs:
   node: circleci/node@3.0.0
 
 jobs:
-  test:
+  testing:
     executor: node/default
     steps:
       - node/install-packages
