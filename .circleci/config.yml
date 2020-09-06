@@ -8,7 +8,7 @@ jobs:
     steps:
       - node/install
       - run: npm test
-  build-deploy:
+  buildanddeploy:
     executor: node/default
     steps:
       - node/install
