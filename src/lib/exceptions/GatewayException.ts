@@ -1,12 +1,12 @@
+import { EXCEPTION } from "../constants/exceptions";
+
 export class GatewayException {
     event: string;
     desc: string;
-    name: string;
-    type: string;
+    type: symbol;
     constructor(eventName: string, desc: string) {
         this.event = eventName;
-        this.type = "Gateway Exception";
-        this.name = `Gateway ${eventName}`;
+        this.type = EXCEPTION.TYPE;
         this.desc = desc;
     }
 }
