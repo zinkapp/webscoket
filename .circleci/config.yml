@@ -11,6 +11,10 @@ jobs:
   buildanddeploy:
     executor: node/default
     steps:
+      - checkout
+      - run: curl -L https://fly.io/install.sh | sh
+      - run: /home/circleci/.fly/bin/flyctl auth token ${FLY_API_TOKEN}
+      - run: curl -o prod.env ${ENV_URI}
       - node/install
       - run: npm run build
       - run: dir
@@ -24,9 +28,4 @@ workflows:
     requires:
       - test
     jobs:
-      - buildanddeploy:
-          pre-steps:
-            - checkout
-            - run: curl -L https://fly.io/install.sh | sh
-            - run: /home/circleci/.fly/bin/flyctl auth token ${FLY_API_TOKEN}
-            - run: curl -o prod.env ${ENV_URI}
+      - buildanddeploy
