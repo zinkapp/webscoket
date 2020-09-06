@@ -1,13 +1,13 @@
 version: 2.1
 orbs:
-  node: circleci/node@4.0.0
+  node: circleci/node@3.0.0
 
 jobs:
-  testtt:
+  testetoe:
     executor: node/default
     steps:
-      - node/install
-      - run: npm test
+      - node/install-packages
+      - run: npm run test:e2e
   buildanddeploy:
     executor: node/default
     steps:
@@ -15,17 +15,17 @@ jobs:
       - run: curl -L https://fly.io/install.sh | sh
       - run: /home/circleci/.fly/bin/flyctl auth token ${FLY_API_TOKEN}
       - run: curl -o prod.env ${ENV_URI}
-      - node/install
+      - node/install-packages
       - run: npm run build
       - run: dir
       - run: /home/circleci/.fly/bin/flyctl --app ${APP_NAME} deploy
         
 workflows:
-  testtt:
+  testetoe:
     jobs:
-      - testtt
+      - testetoe
   build-deploy:
     requires:
-      - test
+      - testetoe
     jobs:
       - buildanddeploy
