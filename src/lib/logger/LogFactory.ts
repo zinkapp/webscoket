@@ -2,8 +2,8 @@ import * as moment from "moment";
 import * as chalk from "chalk";
 
 export interface LOG_CONFIG {
-    displayDate?: Boolean;
-    displayBadge?: Boolean;
+    displayDate?: boolean;
+    displayBadge?: boolean;
     typeDate?: string;
     type: string;
     typeColor: string;
@@ -20,18 +20,20 @@ const DEF_LOG_CONFIG: LOG_CONFIG = {
 };
 
 export class LogFactory {
-    config = DEF_LOG_CONFIG;
+    private config = DEF_LOG_CONFIG;
     constructor(config: LOG_CONFIG) {
         Object.assign(this.config, config);
     }
-    log(...msg) {
-        const res = [];
+    log(...msg: unknown[]): void {
+        const res: unknown[] = [chalk.yellow(`Flyz ${process.pid}`)];
         if (this.config.displayDate)
             res.push(chalk.grey(`[${moment().format(this.config.typeDate)}]`));
         if (this.config.displayBadge)
             res.push(chalk[this.config.typeColor](this.config.badge));
         res.push(chalk.underline[this.config.typeColor](this.config.type));
         res.push(...msg);
-        return console.log(res.join(" "));
+        console[`${this.config.type === "error" ? "error" : "log"}`](
+            res.join(" "),
+        );
     }
 }
