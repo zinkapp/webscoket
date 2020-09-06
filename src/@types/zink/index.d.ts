@@ -1,17 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import http from "http";
 
 export {};
 
 declare global {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     namespace Zink {
         namespace Match {
             interface User extends Zink.User {
                 ready: boolean;
                 socketID: string;
             }
-            type MatchType = "duel" | "catch" | "fast-typing" | "math";
+
+            type MatchType = "duel" | "catch" | "fast-finger" | "math";
+
             interface Area {
-                id: number;
+                id: string;
                 status: boolean;
                 type: MatchType;
                 users: User[];
@@ -31,6 +35,7 @@ declare global {
                           answer: string;
                       };
             }
+
             interface Request extends Zink.Request {
                 match: Area;
             }
@@ -40,17 +45,20 @@ declare global {
             socket: SocketIO.Socket;
             data: any;
         }
+
         interface Response {
-            err?: {
-                code: number;
-                message: string;
-            };
             event?: string;
             room?: string;
             message?: any;
         }
+
+        interface ClientErrorRequest {
+            code: number;
+            message: string;
+        }
+
         interface User {
-            id: number;
+            id: string;
             tag: string;
             gems: number;
             xp: number;
@@ -61,9 +69,7 @@ declare global {
             createdAt: number;
             updateAt: number;
         }
-        abstract class Gateway {
-            constructor([propName]: any);
-
+        export abstract class Gateway {
             onConnection?(socket: SocketIO.Socket): void;
 
             onDisconnect?(socket: SocketIO.Socket): void;
@@ -72,7 +78,7 @@ declare global {
 
             [propName: string]: any | Promise<any>;
         }
-        abstract class Module {
+        export abstract class Module {
             constructor(io: SocketIO.Server);
             [propName: string]: any;
             register?: (...imports) => void;
@@ -83,10 +89,10 @@ declare global {
             providers?: any[];
             exports?: any[];
         }
-        abstract class Service {
+        export abstract class Service {
             [propName: string]: any;
         }
-        abstract class Adapter {
+        export abstract class Adapter {
             public create(
                 app: http.Server,
                 options?: ServerConfig,
@@ -104,6 +110,7 @@ declare global {
         interface ServerConfig extends SocketIO.ServerOptions {
             namespace?: string;
             server?: SocketIO.Server;
+            isCluster?: boolean;
         }
     }
 }
