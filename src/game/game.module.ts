@@ -6,6 +6,7 @@ import { Module } from "../lib/decorators";
 @Module({
     gateways: [GameGateway],
     providers: [GameService],
+    exports: [GameService],
 })
 export class GameModule implements Zink.Module {
     constructor(io: SocketIO.Server) {

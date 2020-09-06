@@ -6,7 +6,7 @@ export class GameGateway implements Zink.Gateway {
     constructor(private gameService: GameService) {}
 
     @Event("iam.ready")
-    iamReady(ctx: Zink.Match.Request) {
-        return this.gameService.iamReadyForMatch(ctx);
+    async iamReady(ctx: Zink.Match.Request): Promise<Zink.Response> {
+        return await this.gameService.iamReadyForMatch(ctx);
     }
 }
