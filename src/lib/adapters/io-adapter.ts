@@ -66,7 +66,7 @@ export class SocketAdapter implements Zink.Adapter {
                         "debug",
                         `Request ${eventName} -> Response {${
                             response.event
-                        }} in ${time[0]+time[1]/10**9}ms`,
+                        }} in ${time[0] + time[1] / 10 ** 9}ms`,
                     );
                     if (response.room)
                         return socket
@@ -80,14 +80,14 @@ export class SocketAdapter implements Zink.Adapter {
                             "debug",
                             `Request ${eventName} -> Response {${
                                 EVENTS.ERROR
-                            }} in ${time[0]+time[1]/10**9}ms`,
+                            }} in ${time[0] + time[1] / 10 ** 9}ms`,
                         );
                         socket.error({ code: e.code, desc: e.desc });
                     } else if (e instanceof GatewayException) {
                         this.logger.log(
                             "debug",
                             `Request ${eventName} -> Response ${e.event} in ${
-                                time[0]+time[1]/10**9
+                                time[0] + time[1] / 10 ** 9
                             }ms`,
                         );
                         socket.emit(e.event, e.desc);

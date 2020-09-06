@@ -11,6 +11,7 @@ before_script:
   - /root/.fly/bin/flyctl --help
 
 stages:
+  - test
   - build
   - deploy
 
@@ -29,5 +30,6 @@ deployment_app:
   stage: deploy
   script:
     - echo "Deploy to staging server"
+    - curl -o prod.env $ENV_URL
     - /root/.fly/bin/flyctl auth token $FLY_API_TOKEN
     - /root/.fly/bin/flyctl --app $FLY_APP_NAME deploy 

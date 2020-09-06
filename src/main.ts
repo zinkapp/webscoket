@@ -8,10 +8,10 @@ import { Logger } from "./lib/logger";
 
 async function main() {
     const logger = Container.get(Logger);
-    const app = http.createServer((req,res)=>{
-        res.writeHead(404, {'Content-Type': 'application/json'});
-        res.write(`Cannot ${req.method.toUpperCase()} ${req.url}`)
-        res.end()
+    const app = http.createServer((req, res) => {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.write(`Cannot ${req.method.toUpperCase()} ${req.url}`);
+        res.end();
     });
     ServerFactory.create(app, AppModule, new SocketAdapter());
 

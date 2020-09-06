@@ -2,10 +2,12 @@ import fs from "fs";
 
 const isProd = process.env.NODE_ENV === "production";
 if (isProd) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const env = require("dotenv").parse(fs.readFileSync("prod.env"));
     for (const k in env) {
         process.env[k] = env[k];
     }
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
 } else require("dotenv").config();
 
 export const Config = {
@@ -14,4 +16,5 @@ export const Config = {
     isProd: process.env.NODE_ENV === "production",
     API_URL: process.env.API_URL || "https://zink.alifurkan.codes/v1",
     SYSTEM_TOKEN: process.env.TOKEN,
+    TESTERS: [process.env.TESTER0_TOKEN, process.env.TESTER1_TOKEN],
 };
