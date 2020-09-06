@@ -3,7 +3,7 @@ orbs:
   node: circleci/node@3.0.0
 
 jobs:
-  testetoe:
+  test:
     executor: node/default
     steps:
       - node/install-packages
@@ -21,11 +21,11 @@ jobs:
       - run: /home/circleci/.fly/bin/flyctl --app ${APP_NAME} deploy
         
 workflows:
-  testetoe:
+  test:
     jobs:
-      - testetoe
+      - test
   build-deploy:
-    requires:
-      - testetoe
     jobs:
-      - buildanddeploy
+      - buildanddeploy:
+          requires:
+            - test
