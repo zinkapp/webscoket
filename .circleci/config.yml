@@ -8,7 +8,7 @@ jobs:
     steps:
       - node/install-packages
       - run: npm run test:e2e
-  buildanddeploy:
+  build-deploy:
     executor: node/default
     steps:
       - checkout
@@ -21,11 +21,11 @@ jobs:
       - run: /home/circleci/.fly/bin/flyctl --app ${APP_NAME} deploy
         
 workflows:
-  test:
+  testing:
     jobs:
-      - test
+      - testing
   build-deploy:
     jobs:
-      - buildanddeploy:
+      - build-deploy:
           requires:
-            - test
+            - testing
