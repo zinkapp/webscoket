@@ -28,4 +28,4 @@ workflows:
     jobs:
       - buildanddeploy:
           requires:
-            - testing
+            - test
