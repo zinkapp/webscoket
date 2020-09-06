@@ -1,12 +1,12 @@
-export class ErrorException {
-    desc: any;
-    name: string;
-    type: string;
+import { EXCEPTION } from "../constants/exceptions";
+
+export class GatewayErrorException {
+    desc: string;
     code: number;
-    constructor(code: number, desc: string = "") {
+    type: symbol;
+    constructor(code: number, desc = "") {
         this.desc = desc;
-        this.type = "Gateway Exception";
-        this.name = "Gateway Error";
+        this.type = EXCEPTION.TYPE;
         this.code = code;
     }
 }
