@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  node: circleci/node@3.0.0
+  node: circleci/node@4.0.0
 
 jobs:
   test:
@@ -11,7 +11,7 @@ jobs:
   build-deploy:
     executor: node/default
     steps:
-      - node/install-packages
+      - node/install
       - run: npm run build
       - run: dir
       - run: /home/circleci/.fly/bin/flyctl --app ${APP_NAME} deploy
