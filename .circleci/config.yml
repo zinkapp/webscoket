@@ -20,9 +20,9 @@ workflows:
   test:
     jobs:
       - test
-  buildanddeploy:
+  build-deploy:
     requires:
-      - testing
+      - test
     jobs:
       - buildanddeploy:
           pre-steps:
