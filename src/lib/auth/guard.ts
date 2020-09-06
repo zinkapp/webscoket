@@ -1,12 +1,13 @@
 import IO from "socket.io";
 import { api } from "../api";
+import { MESSAGES } from "../constants";
 
 export const AuthGuard = async (
     socket: IO.Socket,
-    next: (err?: any) => any,
-) => {
+    next: (err?: unknown) => void,
+): Promise<void> => {
     const { access_token } = socket.handshake.query;
-    if (!access_token) next(new Error("Unauthorized Connection"));
+    if (!access_token) next(new Error(MESSAGES.UNAUTHORIZATION));
     try {
         const user: Zink.User = (
             await api.get("/users/@me", {
@@ -15,11 +16,11 @@ export const AuthGuard = async (
                 },
             })
         ).data;
-        if (!user) return next(new Error("Unauthorized Connection"));
+        if (!user) return next(new Error(MESSAGES.UNAUTHORIZATION));
         socket.user = user;
         socket.token = access_token;
         next();
     } catch (e) {
-        next(new Error("Unauthorized Connection"));
+        next(new Error(MESSAGES.UNAUTHORIZATION));
     }
 };
