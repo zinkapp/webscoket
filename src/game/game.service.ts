@@ -1,104 +1,113 @@
 import { Service } from "typedi";
-import { api } from "../lib/api";
-import * as cache from "memory-cache";
-import { GatewayErrorException } from "../lib/exceptions";
 import { v4 as uuidv4 } from "uuid";
+import { interval } from "rxjs";
+import { Inject } from "../common/decorators";
+import { api } from "../common/api";
+import { MatchAtomService } from "./match-atomic.service";
 
 @Service()
 export class GameService {
-    private matchPool: { [matchID: string]: Zink.Match.Area } = {};
+    constructor(
+        @Inject(() => MatchAtomService)
+        private matchAtomService: MatchAtomService,
+    ) {}
 
-    async createMatch(
-        type: Zink.Match.MatchType,
-        ...ids: string[]
-    ): Promise<Zink.Match.Area> {
-        try {
-            const id = uuidv4();
-            const match: Zink.Match.Area = (
-                await api.put("/matches", { id, type, users: ids })
-            ).data;
-            const pool = cache.get("match.pool") || [];
-            cache.del("match.pool");
-            cache.put("match.pool", [...pool, match]);
-            Object.assign(match, {
-                users: match.users.map((u) =>
-                    Object.assign(u, { ready: true }),
-                ),
-            });
-            this.matchPool[match.id] = match;
-            return match;
-        } catch (e) {
-            console.log(e);
-            throw new GatewayErrorException(400, e.response.data);
-        }
-    }
-    async iamReadyForMatch(ctx: Zink.Match.Request): Promise<Zink.Response> {
-        const match = this.matchPool[ctx.match.id];
-        match.users.map((u) =>
-            u.id === ctx.user.id
-                ? Object.assign(u, { socketID: ctx.socket.id, ready: true })
-                : u,
-        );
-        if (match.users.every((u) => u.ready))
-            return await this.matchArea(
-                match.id,
-                ctx.socket.to(`match.${match.id}`),
-            );
-        return {
-            room: `match.${match.id}`,
-            event: "waiting.match",
-            message: {
-                ready: match.users.filter((u) => u.ready),
-                notReady: match.users.filter((u) => !u.ready),
-            },
-        };
+    private randomNumber(i: number): number {
+        return Math.floor(Math.random() * i);
     }
 
-    async matchArea(
-        id: string,
-        socket: SocketIO.Socket,
-    ): Promise<Zink.Response> {
-        const match = this.matchPool[id];
-        //The Rounds're going to be here
-        return this.finishMatch(match, socket);
-    }
-
-    roundCreate(/*match: Zink.Match.Area*/): void {
-        // switch (match.type) {
-        //     case "catch":
-        //     case "duel":
-        //     case "fast-typing":
-        //     case "math":
-        //     default:
-        //         break;
-        // }
-    }
-    delMatch(id: string): boolean {
-        const matchPool: Zink.Match.Area[] = cache.get("match.pool");
-        cache.put(
-            "match.pool",
-            matchPool.filter((m) => m.id !== id),
-        );
-        delete this.matchPool[id];
-        return true;
-    }
-    finishMatch(
-        match: Zink.Match.Area,
-        socket: SocketIO.Socket,
-    ): Zink.Response {
-        this.delMatch(match.id);
-        match.users.forEach((u) =>
-            socket.in(u.socketID).leave(`match.${match.id}`, () => {
-                socket.in(u.socketID).emit("end.match", {
-                    status: false,
-                    message: "The Game Ended",
+    async nextRound(matchID: string, socket: SocketIO.Socket): Promise<void> {
+        const state = this.matchAtomService.get(matchID, { ref: true });
+        switch (state.type) {
+            case "catch": {
+                const round = await this.createRound(
+                    state.type,
+                    state.difficulty,
+                );
+                state.difficulty += 1 / this.randomNumber(10) + 0.05;
+                const index = state.sequence.push({
+                    ...round,
+                    replies: [],
                 });
-            }),
-        );
+                socket.emit("match.data", round.answer.location);
+                const CatchStateInterval = interval(1000 / 30);
+                const CatchState = CatchStateInterval.subscribe(() => {
+                    if (state.sequence[index].isFinish) {
+                        state.sequence[index].answer = round.answer;
+                        return CatchState.unsubscribe();
+                    }
+                    round.answer.location = round.answer.location.map(
+                        (v, i) => v + round.answer.deltaV[i],
+                    );
+                    socket.emit("match.data.move", round.answer.deltaV);
+                });
+                break;
+            }
+            case "duel": {
+                const round = await this.createRound(
+                    state.type,
+                    state.difficulty,
+                );
+                state.sequence.push({ ...round, replies: [] });
+                await this.matchAtomService.sleep(round.answer);
+                socket.emit("match.data", true);
+                break;
+            }
+            case "fast-finger": {
+                const round = await this.createRound(
+                    state.type,
+                    state.difficulty,
+                );
+                state.sequence.push({ ...round, replies: [] });
+                socket.emit("match.data", round.answer);
+                break;
+            }
+        }
+        state.difficulty += Math.random() * 0.1 + 0.05;
+    }
+
+    createRound(
+        type: "catch",
+        difficulty: number,
+    ): Promise<Zink.Match.IRound<Zink.Match.Rounds.ICatch>>;
+    createRound(
+        type: "duel",
+        difficulty: number,
+    ): Promise<Zink.Match.IRound<number>>;
+    createRound(
+        type: "fast-finger",
+        difficulty: number,
+    ): Promise<Zink.Match.IRound<string>>;
+    async createRound(
+        type: Zink.Match.MatchType,
+        difficulty: number,
+    ): Promise<Zink.Match.IRound<Zink.Match.RoundAnswer>> {
+        let answer: Zink.Match.RoundAnswer;
+        switch (type) {
+            case "catch":
+                answer = {
+                    deltaV: [
+                        difficulty * (this.randomNumber(6) - 2.5) * 5,
+                        difficulty * (this.randomNumber(6) - 2.5) * 5,
+                    ],
+                    location: [this.randomNumber(256), this.randomNumber(384)],
+                };
+                break;
+            case "duel":
+                answer = this.randomNumber(4000) + 2000;
+                break;
+            case "fast-finger":
+                answer = (await api.get("/words", { params: { difficulty } }))
+                    .data;
+                break;
+        }
         return {
-            room: `match.${match.id}`,
-            event: "end.match",
-            message: { status: false, message: "The Game ended" },
+            id: uuidv4(),
+            type,
+            answer,
+            createdAt: process.hrtime(),
+            isFinish: false,
+            replies: [],
         };
     }
 }
