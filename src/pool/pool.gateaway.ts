@@ -1,4 +1,4 @@
-import { Gateway, Event } from "../lib/decorators";
+import { Gateway, Event } from "../common/decorators";
 import { PoolService } from "./pool.service";
 
 @Gateway("/pool")

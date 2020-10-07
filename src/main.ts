@@ -1,10 +1,10 @@
 import * as http from "http";
-import { ServerFactory } from "./lib/app";
-import { AppModule } from "./module";
-import { Config } from "./config";
-import { SocketAdapter } from "./lib/adapters";
 import Container from "typedi";
-import { Logger } from "./lib/logger";
+import { ServerFactory } from "./common/app";
+import { SocketAdapter } from "./common/adapters";
+import { Logger } from "./common/logger";
+import { Config } from "./config";
+import { AppModule } from "./module";
 
 async function main() {
     const logger = Container.get(Logger);
@@ -13,7 +13,7 @@ async function main() {
         res.write(`Cannot ${req.method.toUpperCase()} ${req.url}`);
         res.end();
     });
-    ServerFactory.create(app, AppModule, new SocketAdapter());
+    ServerFactory.create(app, AppModule, SocketAdapter);
 
     await app.listen(Config.PORT, () => {
         logger.log("start", `Application started at ${Config.PORT}`);
