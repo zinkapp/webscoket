@@ -10,7 +10,7 @@ export class TestingServerFactory {
 
     public create(
         Module: typeof Zink.Module,
-        Adapter: Zink.Adapter,
+        Adapter: typeof Zink.Adapter,
         config?: {
             client?: {
                 instance?: number;
