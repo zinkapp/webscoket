@@ -8,6 +8,7 @@ import { AuthGuard } from "../auth/guard";
 
 export class SocketAdapter implements Zink.Adapter {
     private logger: Logger = Container.get(Logger);
+    public label = "Socket.io";
     public create(
         app: http.Server,
         options?: Zink.ServerConfig,
@@ -22,10 +23,10 @@ export class SocketAdapter implements Zink.Adapter {
         gateway: {
             target: unknown;
             path: string;
-            events: Array<{
+            events: {
                 key: string;
                 eventName: string;
-            }>;
+            }[];
         },
     ): void {
         const ga: Zink.Gateway = Container.get(gateway.target);
@@ -38,11 +39,11 @@ export class SocketAdapter implements Zink.Adapter {
                     : null,
             );
             socket.on(EVENTS.PONG, () => socket.emit(EVENTS.PONG, true));
-            this.eventHandlers(socket, gateway.events, ga);
+            this.eventsHandler(socket, gateway.events, ga);
         });
     }
 
-    public eventHandlers(
+    public eventsHandler(
         socket: SocketIO.Socket,
         events: { key: string; eventName: string }[],
         gateway: Zink.Gateway,
@@ -57,6 +58,7 @@ export class SocketAdapter implements Zink.Adapter {
                         data,
                     };
                     const response = await gateway[key](params);
+                    if (!response || response.noResponse) return;
                     if (!response.event)
                         throw new Error("Response Event Not Found");
                     if (!response.message)
