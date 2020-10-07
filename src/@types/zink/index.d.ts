@@ -61,6 +61,7 @@ declare global {
             event?: string;
             room?: string;
             message?: any;
+            noResponse?: boolean;
         }
 
         interface ClientErrorRequest {
@@ -103,7 +104,8 @@ declare global {
         export abstract class Service {
             [propName: string]: any;
         }
-        export abstract class Adapter {
+        export class Adapter {
+            public label: string;
             public create(
                 app: http.Server,
                 options?: ServerConfig,
