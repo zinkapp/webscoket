@@ -1,6 +1,6 @@
 import { PoolGateway } from "./pool.gateaway";
 import { PoolService } from "./pool.service";
-import { Module } from "../lib/decorators";
+import { Module } from "../common/decorators";
 import { GameModule } from "../game/game.module";
 
 @Module({
