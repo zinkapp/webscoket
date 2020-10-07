@@ -1,4 +1,3 @@
-import { Socket } from "socket.io-client";
 import { Service } from "typedi";
 import { Inject } from "../common/decorators";
 import { MatchAtomService } from "./match-atomic.service";
