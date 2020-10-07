@@ -32,7 +32,7 @@ const TYPES = [
         "yellowBright",
         "cyan",
         "blue",
-        "blueBright",
+        "magenta",
     ],
     TYPE_BADGE = {
         emojis: ["🎉", "🚨", "⚠️", "⌛", "🏁", "✋", "👌", "📝", "🐛"],
@@ -41,6 +41,7 @@ const TYPES = [
 
 @Service()
 export class Logger {
+    private atLastLog = Date.now();
     constructor() {
         TYPES.forEach((t, i) => {
             this[t] = new LogFactory({
@@ -54,6 +55,7 @@ export class Logger {
     }
 
     log(type: TYPE, ...msg: unknown[]): void {
+        const time = Date.now();
         if (
             process.env.NODE_ENV === "test" &&
             !(type === "error" || type === "warn")
@@ -66,6 +68,8 @@ export class Logger {
             badge: TYPE_BADGE.unix[i],
             type,
             typeColor: TYPE_COLORS[i],
+            duration: time - this.atLastLog,
         }).log(...msg);
+        this.atLastLog = time;
     }
 }
