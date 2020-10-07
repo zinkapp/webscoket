@@ -1,9 +1,9 @@
-import { TestingServerFactory } from "../src/lib/testing"
+import { TestingServerFactory } from "../src/common/testing"
 import { GameModule } from "../src/game/game.module";
-import { SocketAdapter } from "../src/lib/adapters";
+import { SocketAdapter } from "../src/common/adapters";
 import { Config } from "../src/config";
 import * as cache from "memory-cache"
-import { api } from "../src/lib/api";
+import { api } from "../src/common/api";
 
 describe("Game Namespace (e2e)", () => {
     let server: TestingServerFactory,
