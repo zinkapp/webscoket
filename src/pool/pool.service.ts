@@ -1,13 +1,15 @@
 import { Service } from "typedi";
 import * as cache from "memory-cache";
-import { GameService } from "../game/game.service";
-import { Inject } from "../lib/decorators";
-import { GatewayErrorException } from "../lib/exceptions";
-import { MESSAGES } from "../lib/constants";
+import { MatchService } from "../game/match.service";
+import { Inject } from "../common/decorators";
+import { GatewayErrorException } from "../common/exceptions";
+import { MESSAGES } from "../common/constants";
 
 @Service()
 export class PoolService {
-    constructor(@Inject(() => GameService) private GameService: GameService) {}
+    constructor(
+        @Inject(() => MatchService) private matchService: MatchService,
+    ) {}
     public async joinPool(
         user: Zink.User,
         type: Zink.Match.MatchType,
@@ -18,7 +20,7 @@ export class PoolService {
             throw new GatewayErrorException(400, MESSAGES.ALREADY_JOIN);
         const matchUser = pool.find((u) => u.type === type);
         if (matchUser) {
-            const match = await this.GameService.createMatch(
+            const match = await this.matchService.create(
                 type,
                 matchUser.id,
                 user.id,
