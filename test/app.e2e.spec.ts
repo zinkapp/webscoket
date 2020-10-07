@@ -1,7 +1,7 @@
 import { AppModule } from "../src/module";
-import { TestingServerFactory } from "../src/lib/testing";
-import { SocketAdapter } from "../src/lib/adapters";
-import { EVENTS } from "../src/lib/constants";
+import { TestingServerFactory } from "../src/common/testing";
+import { SocketAdapter } from "../src/common/adapters";
+import { EVENTS } from "../src/common/constants";
 
 describe("Application (e2e)", () => {
     let server: TestingServerFactory, client: SocketIOClient.Socket[];

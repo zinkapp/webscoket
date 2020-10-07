@@ -1,6 +1,6 @@
-import { TestingServerFactory } from "../src/lib/testing";
-import { SocketAdapter } from "../src/lib/adapters";
-import { EVENTS, MESSAGES } from "../src/lib/constants";
+import { TestingServerFactory } from "../src/common/testing";
+import { SocketAdapter } from "../src/common/adapters";
+import { EVENTS, MESSAGES } from "../src/common/constants";
 import { PoolModule } from "../src/pool/pool.module";
 import { Config } from "../src/config";
 import * as cache from "memory-cache";
