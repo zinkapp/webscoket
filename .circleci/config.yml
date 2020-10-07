@@ -6,22 +6,39 @@ jobs:
   testing:
     executor: node/default
     steps:
+      - checkout
       - node/install-packages
       - run: npm run test:e2e
-  build-deploy:
+  build:
     executor: node/default
     steps:
       - checkout
-      - run: curl -L https://fly.io/install.sh | sh
-      - run: /home/circleci/.fly/bin/flyctl auth token ${FLY_API_TOKEN}
-      - run: curl -o prod.env ${ENV_URI}
+      - run:
+          name: Build and push
+          command: |
+            git config credential.helper 'cache --timeout=120'
+            git config user.email ${GIT_EMAIL}
+            git config user.name ${GIT_USERNAME}
+            git commit --allow-empty -m "Deploy with CircleCI"
+            git push -q https://${GITHUB_TOKEN}@github.com/ali-furkqn/zink-flyz build
+  deploy:
+    executor: node/default
+    steps:
+      - checkout
+      - run:
+          name: Install Flyctl
+          command: |
+            curl -L https://fly.io/install.sh | sh
+            /home/circleci/.fly/bin/flyctl auth token ${FLY_API_TOKEN}
+      - run:
+          name: Fetch ENVs
+          command: curl -o prod.env ${ENV_URI}
       - node/install-packages
-      - run: npm run build
-      - run: dir
       - run: /home/circleci/.fly/bin/flyctl --app ${APP_NAME} deploy
         
 workflows:
   test-build-deploy:
     jobs:
       - testing
-      - build-deploy
+      - build
+      - deploy
