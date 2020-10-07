@@ -18,24 +18,35 @@ declare global {
                 id: string;
                 status: boolean;
                 type: MatchType;
-                users: User[];
+                users: (User & { points: number })[];
                 winner: User;
-                sequence: Round[];
+                sequence: IRound<RoundAnswer>[];
+                timeout?: NodeJS.Timeout;
+                difficulty?: number;
             }
-            interface Round {
-                name: string;
+            interface IRound<T extends RoundAnswer> {
+                id: string;
+                isFinish: boolean;
+                winner?: User;
                 type: MatchType;
-                data:
-                    | number
-                    | { x: number; y: number }
-                    | string
-                    | {
-                          description: string;
-                          choices: string[];
-                          answer: string;
-                      };
+                answer: T;
+                replies: Partial<
+                    T & { id: string; time?: [number, number]; isTrue: boolean }
+                >[];
+                createdAt: [number, number];
             }
-
+            type RoundAnswer = number | string | Rounds.ICatch | Rounds.IQuest;
+            namespace Rounds {
+                interface ICatch {
+                    location: number[];
+                    deltaV: number[];
+                }
+                interface IQuest {
+                    description: string;
+                    choices: string[];
+                    answer: string;
+                }
+            }
             interface Request extends Zink.Request {
                 match: Area;
             }
